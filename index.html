@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Sederhana dengan p5.js</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script>
+      let player;
+      let obstacles = [];
+      let canvasWidth;
+      let canvasHeight;
+
+      function setup() {
+        canvasWidth = windowWidth;
+        canvasHeight = windowHeight;
+        createCanvas(canvasWidth, canvasHeight);
+        player = new Player();
+      }
+
+      function draw() {
+        background(220);
+        player.show();
+        player.move();
+
+        if (frameCount % 60 === 0) {
+          obstacles.push(new Obstacle());
+        }
+
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+          obstacles[i].show();
+          obstacles[i].move();
+
+          if (obstacles[i].hits(player)) {
+            console.log('Game Over');
+            noLoop();
+          }
+
+          if (obstacles[i].offScreen()) {
+            obstacles.splice(i, 1);
+          }
+        }
+      }
+
+      function Player() {
+        this.x = canvasWidth / 2;
+        this.y = canvasHeight - 30;
+        this.r = 20;
+
+        this.show = function () {
+          fill(0);
+          ellipse(this.x, this.y, this.r * 2);
+        };
+
+        this.move = function () {
+          if (keyIsDown(LEFT_ARROW) && this.x > this.r) {
+            this.x -= 5;
+          }
+
+          if (keyIsDown(RIGHT_ARROW) && this.x < canvasWidth - this.r) {
+            this.x += 5;
+          }
+        };
+      }
+
+      function Obstacle() {
+        this.x = random(canvasWidth);
+        this.y = 0;
+        this.r = 20;
+        this.speed = 5;
+
+        this.show = function () {
+          fill(255, 0, 0);
+          ellipse(this.x, this.y, this.r * 2);
+        };
+
+        this.move = function () {
+          this.y += this.speed;
+        };
+
+        this.offScreen = function () {
+          return this.y > canvasHeight + this.r;
+        };
+
+        this.hits = function (player) {
+          let d = dist(this.x, this.y, player.x, player.y);
+          return d < this.r + player.r;
+        };
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+        canvasWidth = windowWidth;
+        canvasHeight = windowHeight;
+      }
+    </script>
+  </body>
+</html>
